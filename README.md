@@ -88,21 +88,17 @@ zcat -f /var/log/apache2/*access.log* | uv run a2rps - --fromdate 2025-11-01
 zcat -f /var/log/apache2/*access.log* | uv run a2rps - --fromdate 2025-11-01 --todate 2025-11-07
 ```
 
-### Analyze specific requests
-
-Analyze wp-login and xmlrpc attacks:
-
-```bash
-zcat -f /var/log/apache2/*access.log* | grep -i -e wp-login -e xmlrpc | uv run --with=matplotlib a2rps.py - --fromdate 2025-11-01
-```
-
 ## Examples
 
 ### Analyze an incident
 
+Analyze wp-login and xmlrpc requests:
+
 ```bash
-zcat -f /var/log/apache2/*access.log* | grep -i -e wp-login -e xmlrpc | uv run --with=matplotlib a2rps.py - --fromdate 2025-11-01
+zcat -f /var/log/apache2/*access.log* | grep -i -e wp-login -e xmlrpc | uv run a2rps - --fromdate 2025-11-01
 ```
+
+
 
 ### Monitor real-time traffic
 
