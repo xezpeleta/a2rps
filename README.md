@@ -60,6 +60,8 @@ uv run a2rps /var/log/apache2/myvhost_access.log
 
 ### Follow a log file in real-time
 
+![Example plot generated with a2rps](assets/a2rps.png "Example plot image generated with a2rps")
+
 ```bash
 uv run a2rps -f /var/log/apache2/access.log
 ```
