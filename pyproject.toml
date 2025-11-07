@@ -1,0 +1,23 @@
+[project]
+name = "a2rps"
+version = "0.1.0"
+description = "Apache Requests Per Second - Analyze Apache access logs"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+authors = [
+    {name = "xezpeleta"}
+]
+dependencies = [
+    "matplotlib>=3.0.0",
+]
+
+[project.scripts]
+a2rps = "a2rps:main"
+
+[project.urls]
+Homepage = "https://github.com/xezpeleta/a2rps"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
