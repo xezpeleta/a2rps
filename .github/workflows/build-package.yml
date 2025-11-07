@@ -1,0 +1,77 @@
+name: Build and Release Package
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'a2rps.py'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/build-package.yml'
+  pull_request:
+    paths:
+      - 'a2rps.py'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/build-package.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+      
+      - name: Build package with uv
+        run: uv build .
+      
+      - name: List build artifacts
+        run: ls -lah dist/
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+          retention-days: 90
+  
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.sha }}
+          name: Package Build ${{ github.run_number }}
+          body: |
+            Automated package build from commit ${{ github.sha }}
+            
+            This release contains the built Python package distributions.
+          files: dist/*
+          draft: false
+          prerelease: true
