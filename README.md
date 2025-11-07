@@ -58,15 +58,19 @@ uv run a2rps -f /var/log/apache2/access.log
 
 ### Generate a plot
 
-```bash
-uv run a2rps --plot /var/log/apache2/access.log
-```
-
-### Combine follow and plot
+Save plot to default location (a2rps.png):
 
 ```bash
-uv run a2rps -f --plot /var/log/apache2/access.log
+uv run a2rps /var/log/apache2/access.log --plot
 ```
+
+Save plot to custom location:
+
+```bash
+uv run a2rps /var/log/apache2/access.log --plot ~/my_plot.png
+```
+
+Note: When using `--plot`, the `-f` (follow) flag is ignored.
 
 ### Read from stdin (pipe logs)
 
@@ -122,7 +126,7 @@ positional arguments:
 optional arguments:
   -h, --help           show this help message and exit
   -f, --follow         Follow the log file in real-time (like tail -f)
-  --plot               Generate a plot instead of printing to console
+  --plot [PATH]        Save plot to file (default: a2rps.png if no path specified)
   --fromdate FROMDATE  Filter logs from this date (format: YYYY-MM-DD)
   --todate TODATE      Filter logs to this date (format: YYYY-MM-DD)
 ```
