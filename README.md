@@ -16,16 +16,14 @@ Analyze Apache access logs and calculate requests per second (RPS) metrics.
 
 ### Using uv (recommended)
 
-Run directly without installation:
+```bash
+uv pip install git+https://github.com/xezpeleta/a2rps.git --system
+```
+
+Using `uv` you can also run it directly without installation:
 
 ```bash
 uv run --with=matplotlib https://xezpeleta.github.io/a2rps/a2rps.py
-```
-
-Or install it:
-
-```bash
-uv pip install git+https://github.com/xezpeleta/a2rps.git
 ```
 
 ### Using pip
@@ -41,7 +39,17 @@ pip install git+https://github.com/xezpeleta/a2rps.git --system
 By default, reads `/var/log/apache2/access.log`:
 
 ```bash
-uv run a2rps
+$ uv run a2rps
+...
+2025-11-08 00:13:23: 1 req/s
+2025-11-08 00:14:05: 1 req/s
+2025-11-08 00:14:30: 1 req/s
+2025-11-08 00:15:02: 1 req/s
+--------------------------------------------------
+Total requests: 53
+Average RPS: 1.00
+Max RPS: 1
+Min RPS: 1
 ```
 
 ### Specify a log file
