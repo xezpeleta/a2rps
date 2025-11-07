@@ -112,11 +112,17 @@ def print_rps(rps_data):
         print(f"Min RPS: {min_rps}")
 
 
-def plot_rps(rps_data):
+def plot_rps(rps_data, output_path='a2rps.png'):
     """
-    Create a plot of RPS data using matplotlib.
+    Create a plot of RPS data using matplotlib and save to file.
+    
+    Args:
+        rps_data: Dictionary of timestamp -> request count
+        output_path: Path where to save the plot (default: 'a2rps.png')
     """
     try:
+        import matplotlib
+        matplotlib.use('Agg')  # Use non-GUI backend
         import matplotlib.pyplot as plt
         import matplotlib.dates as mdates
     except ImportError:
@@ -143,7 +149,13 @@ def plot_rps(rps_data):
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
     
     plt.tight_layout()
-    plt.show()
+    
+    # Save to file instead of showing
+    plt.savefig(output_path, dpi=100, bbox_inches='tight')
+    plt.close()
+    
+    # Print confirmation message
+    print(f"Plot saved to: {output_path}")
 
 
 def follow_file(file_handle):
@@ -161,13 +173,21 @@ def follow_file(file_handle):
         yield line
 
 
-def process_log_file(file_handle, follow=False, fromdate=None, todate=None, plot=False):
+def process_log_file(file_handle, follow=False, fromdate=None, todate=None, plot_path=None):
     """
     Process log file and calculate RPS.
+    
+    Args:
+        file_handle: File handle to read logs from
+        follow: Whether to follow the file (tail -f mode)
+        fromdate: Filter logs from this date
+        todate: Filter logs to this date
+        plot_path: If provided, save plot to this path instead of printing stats
     """
     timestamps = []
     
-    if follow:
+    if follow and not plot_path:
+        # Follow mode only works when plot is not requested
         print("Following log file... (Ctrl+C to stop)")
         print("-" * 50)
         
@@ -213,30 +233,33 @@ def process_log_file(file_handle, follow=False, fromdate=None, todate=None, plot
             # Show final stats
             rps_data = calculate_rps(timestamps)
             print_rps(rps_data)
-            if plot:
-                plot_rps(rps_data)
+        return
+    
+    # Warn if follow was requested with plot
+    if follow and plot_path:
+        print("Warning: --follow (-f) is ignored when --plot is used", file=sys.stderr)
+    
+    # Process all lines (non-follow mode or plot mode)
+    for line in file_handle:
+        line = line.strip()
+        if not line:
+            continue
+        
+        dt, _ = parse_apache_log_line(line)
+        if dt:
+            timestamps.append(dt)
+    
+    # Apply date filters
+    if fromdate or todate:
+        timestamps = filter_by_date(timestamps, fromdate, todate)
+    
+    # Calculate and display RPS
+    rps_data = calculate_rps(timestamps)
+    
+    if plot_path:
+        plot_rps(rps_data, plot_path)
     else:
-        # Process all lines
-        for line in file_handle:
-            line = line.strip()
-            if not line:
-                continue
-            
-            dt, _ = parse_apache_log_line(line)
-            if dt:
-                timestamps.append(dt)
-        
-        # Apply date filters
-        if fromdate or todate:
-            timestamps = filter_by_date(timestamps, fromdate, todate)
-        
-        # Calculate and display RPS
-        rps_data = calculate_rps(timestamps)
-        
-        if plot:
-            plot_rps(rps_data)
-        else:
-            print_rps(rps_data)
+        print_rps(rps_data)
 
 
 def main():
@@ -254,11 +277,11 @@ Examples:
   # Follow a log file in real-time
   %(prog)s -f /var/log/apache2/access.log
   
-  # Generate a plot
+  # Generate and save a plot to default path (a2rps.png)
   %(prog)s --plot /var/log/apache2/access.log
   
-  # Follow and plot
-  %(prog)s -f --plot /var/log/apache2/access.log
+  # Generate and save a plot to specific path
+  %(prog)s --plot ~/my_plot.png /var/log/apache2/access.log
   
   # Read from stdin
   zcat /var/log/apache2/access.log.gz | %(prog)s -
@@ -286,8 +309,11 @@ Examples:
     
     parser.add_argument(
         '--plot',
-        action='store_true',
-        help='Generate a plot instead of printing to console'
+        nargs='?',
+        const='a2rps.png',
+        default=None,
+        metavar='PATH',
+        help='Save plot to file (default: a2rps.png if no path specified)'
     )
     
     parser.add_argument(
@@ -309,13 +335,13 @@ Examples:
             sys.exit(1)
         
         process_log_file(sys.stdin, follow=False, fromdate=args.fromdate, 
-                        todate=args.todate, plot=args.plot)
+                        todate=args.todate, plot_path=args.plot)
     else:
         # Handle file input
         try:
             with open(args.logfile, 'r') as f:
                 process_log_file(f, follow=args.follow, fromdate=args.fromdate,
-                               todate=args.todate, plot=args.plot)
+                               todate=args.todate, plot_path=args.plot)
         except FileNotFoundError:
             print(f"Error: Log file not found: {args.logfile}", file=sys.stderr)
             sys.exit(1)
