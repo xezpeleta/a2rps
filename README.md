@@ -31,7 +31,7 @@ uv pip install git+https://github.com/xezpeleta/a2rps.git
 ### Using pip
 
 ```bash
-pip install git+https://github.com/xezpeleta/a2rps.git
+pip install git+https://github.com/xezpeleta/a2rps.git --system
 ```
 
 ## Usage
@@ -71,17 +71,17 @@ uv run a2rps -f --plot /var/log/apache2/access.log
 ### Read from stdin (pipe logs)
 
 ```bash
-zcat /var/log/apache2/*access.log* | uv run a2rps -
+zcat -f /var/log/apache2/*access.log* | uv run a2rps -
 ```
 
 ### Filter by date
 
 ```bash
-zcat /var/log/apache2/*access.log* | uv run a2rps - --fromdate 2025-11-01
+zcat -f /var/log/apache2/*access.log* | uv run a2rps - --fromdate 2025-11-01
 ```
 
 ```bash
-zcat /var/log/apache2/*access.log* | uv run a2rps - --fromdate 2025-11-01 --todate 2025-11-07
+zcat -f /var/log/apache2/*access.log* | uv run a2rps - --fromdate 2025-11-01 --todate 2025-11-07
 ```
 
 ### Analyze specific requests
@@ -89,7 +89,7 @@ zcat /var/log/apache2/*access.log* | uv run a2rps - --fromdate 2025-11-01 --toda
 Analyze wp-login and xmlrpc attacks:
 
 ```bash
-zcat /var/log/apache2/*access.log* | grep -i -e wp-login -e xmlrpc | uv run --with=matplotlib a2rps.py - --fromdate 2025-11-01
+zcat -f /var/log/apache2/*access.log* | grep -i -e wp-login -e xmlrpc | uv run --with=matplotlib a2rps.py - --fromdate 2025-11-01
 ```
 
 ## Examples
