@@ -39,7 +39,7 @@ jobs:
           version: "latest"
       
       - name: Build package with uvx
-        run: uvx build .
+        run: uvx --from build pyproject-build .
       
       - name: List build artifacts
         run: ls -lah dist/
