@@ -38,8 +38,8 @@ jobs:
         with:
           version: "latest"
       
-      - name: Build package with uv
-        run: uv build .
+      - name: Build package with uvx
+        run: uvx build .
       
       - name: List build artifacts
         run: ls -lah dist/
@@ -47,8 +47,8 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: python-package-distributions
-          path: dist/
+          name: uvx-package
+          path: dist/*.uvx
           retention-days: 90
   
   release:
@@ -63,7 +63,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: python-package-distributions
+          name: uvx-package
           path: dist/
       
       - name: Create Release
@@ -72,9 +72,13 @@ jobs:
           tag_name: build-${{ github.sha }}
           name: Package Build ${{ github.run_number }}
           body: |
-            Automated package build from commit ${{ github.sha }}
+            Automated UVX package build from commit ${{ github.sha }}
             
-            This release contains the built Python package distributions.
-          files: dist/*
+            This release contains the self-contained .uvx package that can be installed with:
+            ```
+            uvx install a2rps-*.uvx
+            uvx run a2rps
+            ```
+          files: dist/*.uvx
           draft: false
           prerelease: true
